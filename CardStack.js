@@ -28,6 +28,14 @@ var CardStack = function(){
     that.draw = function(){
         return that.__stack.pop();
     }
+
+    that.empty = function(){
+        if (that.__stack.length > 0){
+            return false;
+        } else{
+            return true;
+        }
+    }
     
     return that;
 };

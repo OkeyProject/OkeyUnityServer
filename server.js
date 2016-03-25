@@ -1,5 +1,6 @@
 var net = require('net');
 var CardStack = require('./CardStack');
+var mysql = require('./MysqlConnection.js');
 
 var HOST = '140.113.123.225';
 var PORT = 7975;
@@ -17,5 +18,15 @@ var server = net.createServer(function(sock){
 
 });
 
+var cd = new CardStack();
+console.log(cd.__stack);
 
-server.listen(PORT, HOST);
+mysql("SELECT * FROM game", function(err, results){
+   if (err){
+        throw err;
+   } else{
+        console.log(results)   
+   }
+});
+
+//server.listen(PORT, HOST);
