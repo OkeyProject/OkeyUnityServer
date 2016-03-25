@@ -1,4 +1,7 @@
 var CardStack = function(){
+    if ((!this instanceof CardStack)){
+        return new CardStack();
+    }
     var that = {};
     that.__color = ['blue', 'yellow', 'black', 'red'];
     that.__stack = new Array();
