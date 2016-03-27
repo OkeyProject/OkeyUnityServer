@@ -18,15 +18,5 @@ var server = net.createServer(function(sock){
 
 });
 
-var cd = new CardStack();
-console.log(cd.__stack);
-
-mysql("SELECT * FROM game", function(err, results){
-   if (err){
-        throw err;
-   } else{
-        console.log(results)   
-   }
-});
 
 //server.listen(PORT, HOST);
