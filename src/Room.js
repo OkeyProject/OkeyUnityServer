@@ -62,6 +62,7 @@ var Room = function(roomType){
             }
             
             var emptyPlayer = false;
+            var order = 1;
             for (var i in results[0]){
                 if(results[0][i] == null){
                     var cbSql = new Mysql();
@@ -70,11 +71,13 @@ var Room = function(roomType){
                     playerId = data[i];
                     cbSql.Update("game", data, "game_id="+gameId,function(err, data, fields){
                         if (err) throw err;
-                        return callback(err, playerId);
+                        return callback(err, playerId, order);
                     });
                     emptyPlayer = true;
                     break;
                 }
+
+                order++;
             }
             if(!emptyPlayer){
                 return callback("No space for another player","");
@@ -90,13 +93,34 @@ var Room = function(roomType){
     that.CreateRoom = function(callback){
         InsertGameInfo(gameId, function(err, gameId, playerId){
             if(err) throw err;
+            var playerSql = new Mysql();
+            var data = {
+                game_id : gameId,
+                player_id: playerId,
+                player_order: 1,
+            };
+            playerSql.Insert("player", data, function(err, results){
+                if(err) throw err;
+            });
             return callback(err, gameId, playerId);       
         });
     }
 
     that.JoinRoom = function(gameId, callback){
-        InsertPlayerInfo(gameId, function(err, playerId){
-            if(err) console.log( err);
+        InsertPlayerInfo(gameId, function(err, playerId, order){
+            if(err) {
+                throw err;
+            }else{
+                var playerSql = new Mysql();
+                var data = {
+                    game_id: gameId,
+                    player_id: playerId,
+                    player_order: order
+                }
+                playerSql.Insert("player", data, function(err, results){
+                    if(err) throw err;
+                });
+            }
             return callback(err, playerId);
         });
     }
@@ -109,10 +133,10 @@ var room = new Room();
 /*room.CreateRoom(function(err, gameId, playerId){
     console.log(gameId+"  "+playerId);
 });*/
-/*room.JoinRoom(2016280273479, function(err, playerId){
+room.JoinRoom(2016280273479, function(err, playerId){
     if(err){
         console.log(err);
     }else{
         console.log(playerId);
     }
-});*/
+});

@@ -1,3 +1,5 @@
+var Mysql = require('./CardStack.js');
+
 var CardStack = function(){
     if ((!this instanceof CardStack)){
         return new CardStack();
