@@ -58,7 +58,8 @@ var Room = function(roomType){
         mysql.Select("game", cols, "game_id="+gameId, function(err, results){
             if(err) throw err;
             if(results.length == 0){
-                return callback("Wrong game id","");
+                throw new Error("Wrong game id");
+                //return callback("Wrong game id","");
             }
             
             var emptyPlayer = false;
@@ -80,7 +81,8 @@ var Room = function(roomType){
                 order++;
             }
             if(!emptyPlayer){
-                return callback("No space for another player","");
+                throw new Error("No space for another player");
+                //return callback("No space for another player","");
             }
         });       
         
@@ -92,16 +94,23 @@ var Room = function(roomType){
 
     that.CreateRoom = function(callback){
         InsertGameInfo(gameId, function(err, gameId, playerId){
-            if(err) throw err;
-            var playerSql = new Mysql();
-            var data = {
-                game_id : gameId,
-                player_id: playerId,
-                player_order: 1,
-            };
-            playerSql.Insert("player", data, function(err, results){
-                if(err) throw err;
-            });
+            if(err) {
+                throw err;
+            } else {
+                var playerSql = new Mysql();
+                var discardSql = new Mysql();
+                var data = {
+                    game_id : gameId,
+                    player_id: playerId,
+                    player_order: 1,
+                };
+                playerSql.Insert("player", data, function(err, results){
+                    if(err) throw err;
+                });
+                discardSql.Insert("discard", {game_id: gameId}, function(err, results){
+                    if(err) throw err;
+                });
+            }
             return callback(err, gameId, playerId);       
         });
     }
@@ -133,7 +142,7 @@ var room = new Room();
 /*room.CreateRoom(function(err, gameId, playerId){
     console.log(gameId+"  "+playerId);
 });*/
-room.JoinRoom(2016280273479, function(err, playerId){
+room.JoinRoom(20163031557860, function(err, playerId){
     if(err){
         console.log(err);
     }else{
