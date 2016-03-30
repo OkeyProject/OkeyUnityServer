@@ -1,3 +1,4 @@
+var exports = module.exports = {};
 var Mysql = require('./MysqlConnection.js');
 var GameCards = require('./GameCards.js');
 
@@ -27,12 +28,34 @@ var Game = function(){
                 var data = {hand: JSON.stringify(playerHand)};
                 var cond = "game_id="+gameId+" AND player_id='"+playersId[i]+"'";
                 var mysql = new Mysql();
-
-                mysql.Update("player", data, cond, function(err){});
+                mysql.Update("player", data, cond, function(err){
+                    if(err) throw err;
+                });
             }
-        
+
         });
     }
+
+    var OrderUpdate  = function(gameId){
+        var orderUpdateSql = new Mysql();
+        orderUpdateSql.Update("game",{current_order: 1}, "game_id="+gameId, function(err){
+            if(err) throw err;
+        });
+        
+    };
+
+    var DiscardInit = function(gameId){
+        var mysql = new Mysql();
+        data = {
+            p1: '[]',
+            p2: '[]',
+            p3: '[]',
+            p4: '[]'
+        };
+        mysql.Update("discard", data, "game_id="+gameId, function(err){
+            if(err) throw err;
+        });
+    };
 
 
     that = {};
@@ -43,13 +66,16 @@ var Game = function(){
             if(err){ 
                 throw err;
             }else{
-                if(results.length != 4) throw new Error("No enough player");
+                if(results.length != 4) callback(new Error("No enough player"));
                 var playersId = [];
+                console.log(results);
                 for(var i in results){
                     playersId.push(results[i]['player_id']);
                 }
                 Deal(gameId,playersId);
-                callback(err, results);
+                OrderUpdate(gameId);
+                DiscardInit(gameId);
+                callback(err);
             }
         });
     }
@@ -58,12 +84,8 @@ var Game = function(){
     return that;
 
 };
-
-var game = new Game();
-game.Start(20163031557860, function(err, results){
-    if(err){
-        throw new Error(err);
-    } else{
-        console.log(results.length);   
-    } 
-});
+module.exports = Game;
+/*var game = new Game();
+game.Start(20163031557860, function(err){
+    if(err) throw err;
+});*/

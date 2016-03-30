@@ -138,14 +138,14 @@ var Room = function(roomType){
 };
 
 module.exports = Room;
-var room = new Room();
+//var room = new Room();
 /*room.CreateRoom(function(err, gameId, playerId){
     console.log(gameId+"  "+playerId);
 });*/
-room.JoinRoom(20163031557860, function(err, playerId){
+/*room.JoinRoom(20163031557860, function(err, playerId){
     if(err){
         console.log(err);
     }else{
         console.log(playerId);
     }
-});
+});*/
