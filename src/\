@@ -57,41 +57,11 @@ var Game = function(){
         });
     };
 
-    var GetCurrentOrder = function(gameId, callback){
+    var GetCuurentOrder = function(){
         var mysql = new Mysql();
-        mysql.Select("game", ["current_order"], "game_id="+gameId,function(err, results){
-            callback(err, results);
-        });
+
     }
 
-
-    var GetPlayerCard = function(gameId, playerOrder, callback){
-        var mysql = new Mysql();
-        mysql.Select("player", ['hand'], "game_id="+gameId+" AND player_order="+playerOrder, function(err, hand){
-            if(err) {
-                throw err;
-            } else {
-                var discardSql = new Mysql();
-                var lastPlayerOrder = playerOrder==1 ? 4:playerOrder-1
-                var col = "p"+lastPlayerOrder;
-                discardSql.Select("discard", [col], "game_id="+gameId, function(err, discard){
-                    if(err){
-                        throw err;
-                    } else {
-                        var cards = JSON.parse(discard[0]['p'+lastPlayerOrder]);
-                        if(discard.length == 0){
-                            callback(new Error("Can's get discard"), hand, discard);
-                        } else if(cards.length == 0){
-                            callback(err, JSON.parse(hand[0]['hand']), {color: "empty", number: "empty"});
-                        } else{
-                            callback(err, JSON.parse(hand[0]['hand']), cards.pop());
-                        }
-                    }
-                });
-            }
-        });
-
-    }
 
     that = {};
     
@@ -115,45 +85,8 @@ var Game = function(){
         });
     }
     
-    that.CurrentPlayer = function(gameId, callback){
-        GetCurrentOrder(gameId, function(err, results){
-            if(err){
-                throw err;
-            } else {
-                if(results.length == 0){
-                    return callback(new Error("Can't get order",""));
-                } else{
-                    return callback(err, results[0]['current_order']);
-                }
-            }
-        });
-    }
-
-    that.GetCurrentState = function(gameId, callback){
-        that.CurrentPlayer(gameId, function(err, currentPlayer){
-            if(err) throw err;
-            GetPlayerCard(gameId, currentPlayer, function(err, hand, discard){
-                if(err){
-                    throw err;
-                } else{
-                    callback(err, currentPlayer, hand, discard);
-                }
-            });
-        });
-    }
-
-    that.NextState = function(gameId){
-        that.CurrentPlayer(gameId, function(err, currentPlayer){
-            if(err){
-                throw err;
-            } else {
-                var mysql = new Mysql();
-                var nextPlayerOrder = currentPlayer==4? 1:currentPlayer+1;
-                mysql.Update("game", {current_order: nextPlayerOrder}, "game_id="+gameId, function(err){
-                    if(err) throw err;
-                });
-            }
-        });
+    that.CurrentPlayer = function(){
+        
     }
 
     return that;
