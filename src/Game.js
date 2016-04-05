@@ -20,7 +20,7 @@ var Game = function(){
                 var playerHand = [[],[]];
                 for(var j=0;j<12;j++){
                     playerHand[0].push(playersCard[i].pop());
-                    playerHand[1].push({color:'empty',number:'empty'});
+                    playerHand[1].push({color:'empty',number: 0});
                 }
                 playerHand[1][0] = playersCard[i].pop();
                 playerHand[1][1] = playersCard[i].pop();
@@ -82,7 +82,7 @@ var Game = function(){
                         if(discard.length == 0){
                             callback(new Error("Can's get discard"), hand, discard);
                         } else if(cards.length == 0){
-                            callback(err, JSON.parse(hand[0]['hand']), {color: "empty", number: "empty"});
+                            callback(err, JSON.parse(hand[0]['hand']), {color: "empty", number: 0});
                         } else{
                             callback(err, JSON.parse(hand[0]['hand']), cards.pop());
                         }
@@ -91,6 +91,26 @@ var Game = function(){
             }
         });
 
+    }
+
+    var ShrinkArray = new function(arr){
+        var newArr = [];
+        for(var i = 0, arrNum = arr.length; i < arrNum; i++){
+            for(var j = 0, arrLen = arr[i].length; j<arrLen; j++){
+                newaArr.push(arr[i][j]);
+            }
+        }
+
+        return newArr;
+    }
+
+    var SearchElement = function(arr, element){
+        for(var i = 0, max = arr.length; i < max; i++){
+            if(arr[i] === element){
+                return i;
+            }
+        }
+        return -1;
     }
 
     that = {};
@@ -152,6 +172,60 @@ var Game = function(){
                 mysql.Update("game", {current_order: nextPlayerOrder}, "game_id="+gameId, function(err){
                     if(err) throw err;
                 });
+            }
+        });
+    }
+
+    that.DrawCard = function(gameId, callback){
+        var gameCards = new GameCards(gameId);
+        if(!gameCards.IsEmpty()){
+            gameCards.StackDraw(1, function(drawedCard){
+                that.GetCurrentState(gameId, function(err, currentPlayer, hand, discard){
+                    hand[1].push(drawedCard);
+                    var mysql = new Mysql();
+                    mysql.Update("player", {hand:JSON.stringify(hand)}, "game_id="+gameId+" AND player_order="+currentPlayer, function(err){
+                        if(err) throw err;
+                        callback(err, drawedCard);
+                    });
+                });
+            });
+        } else {
+            callback(new Error("CardStack is Empty"), null);
+        }
+    }   
+
+    that.ThrowCard = function(gameId, newHand, callback){
+        that.GetCurrentState(gameId, function(err, currentPlayer, hand, discard){
+            if( err ){
+                throw err;
+            } else { 
+                if(hand[1].length == 12){
+                    if(discard['number'] > 0){
+                        hand[1].push(discard);
+                    } else{
+                        throw new Error("No deal and no discard");
+                    }
+                }
+                
+                var oldHand = ShrinkArray(hand);
+                var cmpHand = ShrinkArray(newHand);
+                for(var i=0, max=cmpHand.length; i< max; i++){
+                    var elementId = SearchElement(oldHand, cmpHand[i]);
+                    if(elementId >= 0){
+                        delete oldHand[i];
+                    } else{
+                        return callback(new Error("Illegal element"));
+                    }
+                }
+
+                if(oldHand.length === 1){
+                    var mysql = new Mysql();
+                    mysql.Update("player", ['hand'], "game_id="+gameId+" AND player_order="+currentPlayer, function(err){
+                        return callback(err);
+                    });
+                } else{
+                    return callback(new Error("Illegal element"));
+                }
             }
         });
     }
