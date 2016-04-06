@@ -21,12 +21,14 @@ function main(){
         console.log(currentPlayer);
         console.log(hand);
         console.log(discard);
+        game.DrawCard(gameId, cont(err, drawedCard));
+        console.log(drawedCard);
     });
 }
 
 var code = main.toString();
 var compiledCode = Continuation.compile(code);
-//console.log(compiledCode);
+console.log(compiledCode);
 eval(compiledCode);
 
 main();
