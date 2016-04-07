@@ -1,0 +1,23 @@
+var exports = module.exports = {};
+
+var HOST = "140.113.123.225";
+var PORT = "7975";
+
+var Game = require('./Game.js');
+var Room = require('./Room.js');
+var Net  = require('net');
+
+var Server = function(){
+    if(!(this instanceof Server)){
+        return new Server();
+    }
+
+    var that = {};
+
+    var server = Net.createServer(function(socket){
+        socket.on('data', function(data){
+            
+        });
+    });
+}
+
