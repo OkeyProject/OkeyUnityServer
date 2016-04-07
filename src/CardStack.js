@@ -1,3 +1,5 @@
+var Mysql = require('./CardStack.js');
+
 var CardStack = function(){
     if ((!this instanceof CardStack)){
         return new CardStack();
@@ -17,8 +19,8 @@ var CardStack = function(){
 
     for (var number = 1; number <= 13; number++){
         for(var colorId = 0; colorId <4; colorId++){
-            that.__stack.push({'number': number, 'color': that.__color[colorId]});
-            that.__stack.push({'number': number, 'color': that.__color[colorId]});
+            that.__stack.push({'color': that.__color[colorId], 'number':number});
+            that.__stack.push({'color': that.__color[colorId], 'number':number});
         }
     }
     
