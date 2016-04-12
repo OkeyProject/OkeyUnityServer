@@ -14,69 +14,52 @@ var Server = function(){
 
     var that = {};
     
-    var chkKey = function(data, key, limits){
-        if(!(key in data)){
-            return key+" is not specified.";
-        }
-        
-        for(var i = 0, max = limits.length; i<max;i++){
-            if(limits[i] === data[key]){
-                return null;
+    var ErrMsg = function(msg){
+        return JSON.stringify({state: 0, error: msg});
+    }
+
+    var RoomCommand = function(data, callback){
+        var game = new Game();
+        if(!("command" in data)){
+            callback(ErrMsg("No comman specified"), null, null);
+        } else if(data['command'] === "create"){
+            game.CreateRoom(function(err, gameId, playerId){
+                if(err){
+                    callback(err, null, null);
+                } else {
+                    callback(err, gameId, playerId);
+                }
+            });
+        } else if(data['command'] === "join"){
+            if(!("game_id" in data)){
+                callback(ErrMsg("Game id required"), null, null);
+            } else{
+                game.JoinRoom(data['game_id'], function(err, playerId){
+                    if(err){
+                        callback(err, null, null);
+                    } else {
+                        callback(err, data['game_id'],playerId);   
+                    }
+                });
             }
         }
+    }    
 
-        return "Unknown parameter "+datap[key];
+    var GameCommand = function(data, callback){
+        
     }
+
 
     var server = Net.createServer(function(socket){
         socket.on('data', function(data){
-            var err = chkKey(data, "action", ['room', 'game']);
-            if(err){
-                socket.write(JSON.stringify({state: 0, error: err}));
+            if(!("action" in data)){
+                socket.write(ErrMsg("No action specified"));
+            } else if(data['action'] === "room"){
+                
+            } else if(data['action'] === "game"){
+                
             } else {
-                var roomErr = chkKey(data, "command", ['create', 'join']);
-                var gameErr = chkKey(data, "command", ['start','state', 'draw', 'throw']);
-
-                if(roomErr != null && gameErr != null){
-                    return socket.write(JSON.stringify({state: 0, error: roomErr}));
-                } else if(roomErr ===null && gameErr === null){
-                    return socket.write(JSON.stringify({state: 0, error: "too many actions"}));
-                } else if(roomErr === null){
-                    var room = new Room();
-                    switch(data['command']){
-                        case "create":
-                            room.CreateRoom(function(err, gameId, playerId){
-                                if(err){
-                                    return socket.write(JSON.stringify({state: 0, error: err}));
-                                } else{
-                                    return socket.write({state: 1, game_id: gameId, player_id: playerId});
-                                }
-                            });
-                            break;
-                        case "join":
-                            room.JoinRoom(data['game_id'], function(err, playerId){
-                                if(err){
-                                    return socket.write(JSON.stringify({state: 0, error: err}));
-                                } else{
-                                    return socket.write(JSON.stringify({state: 1, player_id: playerId}));
-                                }
-                            });
-                            break;
-                    }
-                } else{
-                    switch(data['command']) {
-                    case "start":
-                        break;
-                    case "state":
-                        break;
-                    case "draw":
-                        break;
-                    case "throw":
-                        break;
-                    }
-                
-                }
-                
+                socket.write(ErrMsg("Unknown action"));
             }
         });
     });

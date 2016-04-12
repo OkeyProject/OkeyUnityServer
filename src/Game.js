@@ -72,7 +72,12 @@ var Game = function(){
                 throw err;
             } else {
                 var discardSql = new Mysql();
-                var lastPlayerOrder = playerOrder==1 ? 4:playerOrder-1
+                var lastPlayerOrder = 1;
+                if(playerOrder === 1){
+                    lastPlayerOrder = 4;
+                } else {
+                    lastPlayerOrder = playerOrder-1;
+                }
                 var col = "p"+lastPlayerOrder;
                 discardSql.Select("discard", [col], "game_id="+gameId, function(err, discard){
                     if(err){
@@ -222,7 +227,9 @@ var Game = function(){
                 if(oldHand.length === 1){
                     var mysql = new Mysql();
                     mysql.Update("player",{hand:JSON.stringify(newHand)},"game_id="+gameId+" AND player_order="+currentPlayer,function(err){
-                        that.NextState(gameId, function(){
+                        //var handUpdateSql = new Mysql();
+                
+                        that.NextState(gameId, function(err){
                             return callback(err);
                         });
                     });
