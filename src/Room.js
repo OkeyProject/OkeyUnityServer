@@ -128,9 +128,9 @@ var Room = function(roomType){
                 }
                 playerSql.Insert("player", data, function(err, results){
                     if(err) throw err;
+                    return callback(err, playerId);
                 });
             }
-            return callback(err, playerId);
         });
     }
 
