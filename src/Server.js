@@ -54,12 +54,28 @@ var Server = function(){
                         } else if(data['command']==="join"){
                             if("game_id" in data){
                                 if(data['game_id'] in gameServers){
-                                    room.JoinRoom(data['game_id'], function(err, playerId){
-                                        if(err){
-                                            return socket.write(ErrMsg(err));
+                                    gameServers[data['game_id']].CheckAlive(function(isAlive, liveList, deadList){
+                                        if(deadList.length > 0){
+                                            room.LeaveRoom(deadList[0], data['game_id'], function(err){
+                                                if(err) return socket.write(ErrMsg(err));
+                                                room.JoinRoom(data['game_id'], function(err, playerId){
+                                                    if(err){
+                                                        return socket.write(ErrMsg(err));
+                                                    } else{
+                                                        gameServers[data['game_id']].AddPlayer(socket, playerId);     
+                                                        return socket.write(JSON.stringify({reply: 0, player_id: playerId}));
+                                                    }
+                                                });
+                                            });
                                         } else{
-                                            gameServers[data['game_id']].AddPlayer(socket, playerId);     
-                                            return socket.write(JSON.stringify({reply: 0, player_id: playerId}));
+                                            room.JoinRoom(data['game_id'], function(err, playerId){
+                                                if(err){
+                                                    return socket.write(ErrMsg(err));
+                                                } else{
+                                                    gameServers[data['game_id']].AddPlayer(socket, playerId);     
+                                                    return socket.write(JSON.stringify({reply: 0, player_id: playerId}));
+                                                }
+                                            });
                                         }
                                     });
                                 } else{
