@@ -1,8 +1,8 @@
 var exports = module.exports = {};
 
 var Room = require('./Room.js');
-var game = require('./Game.js');
-var Promise = require('promise');
+var Game = require('./Game.js');
+var Async = require('async');
 
 var GameServer = function(gameId){
     if(!(this instanceof GameServer)){
@@ -55,13 +55,14 @@ var GameServer = function(gameId){
         
     }
 
-    var Boardcast = function(msg, callback){
-        that.CheckAlive(function(isAlive, liveList){
+    that.Boardcast = function(msg, callback){
+        that.CheckAlive(function(isAlive, liveList,deadList){
             console.log("Alive: "+liveList.toString());
             if(isAlive){
                 for(var i=0,max=liveList.length; i<max ;i++){ 
                     players[i].socket.write(JSON.stringify({reply: 0, msg: msg}));
                 }
+                
                 return callback();
             }
             return callback();
@@ -73,8 +74,13 @@ var GameServer = function(gameId){
         var newPlayer = new player(socket, id);
         for(var i=0; i<4; i++){
             if(players[i] === null){
-                Boardcast("Player "+i+" join the game", function(){
+                that.Boardcast("Player "+(i+1).toString()+" join the game", function(){
                     players[i] = newPlayer;
+                    that.CheckAlive(function(isAlive, liveList, deadList){
+                        if(liveList.length === 4){
+                            that.Start();
+                        }
+                    });
                 });
                 return true;
             }
@@ -83,12 +89,47 @@ var GameServer = function(gameId){
         //newPlayer.socket.write("Waiting for game start...");
     }
     
-    that.RoomState = function(callback){
-        
-    }
-
     that.Start = function(){
-        checkAlive(function(alive, liveList){
+        that.Boardcast("Game Start", function(){});
+        var game = new Game();
+        game.Start(gameId, function(){
+            Async.waterfall([
+                function(callback){
+                    game.GetCurrentState(gameId, function(err,currentPlayer, hand, discard){
+                        if(err) throw err;
+                        else callback(null,currentPlayer, hand, discard);                   
+                    });
+                },
+                function(currentPlayer, hand, discard, callback){
+                    var writeData = {
+                        reply: 1,
+                        action: "get",
+                        game_id: gameId,
+                        hand: hand,
+                        discard: discard,
+                        msg: "Take or draw a new card."
+                    }
+                    players[currentPlayer-1].socket.write(JSON.stringify(writeData));
+                }
+            ],         
+            function(err){
+            });
+        });
+    }
+    
+    that.newRound = function(){
+        game.GetCurrentState(gameId, function(err,currentPlayer, hand, discard){
+            if(err) throw err;
+            
+            var writeData = {
+                reply: 1,
+                action: "get",
+                game_id: gameId,
+                hand: hand,
+                discard: discard,
+                msg: "Take or draw a new card."
+            }
+            players[currentPlayer-1].socket.write(JSON.stringify(writeData));
         });
     }
 

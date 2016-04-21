@@ -20,6 +20,10 @@
     "sqlite3": "~3.1.2",
     "mysql": "~2.10.2",
     "promise": "~7.1.1",
-    "continuation": "~0.1.7"
+    "continuation": "~0.1.7",
+    "express": "~4.13.4",
+    "socket.io": "~1.4.5",
+    "async": "~2.0.0-rc.3",
+    "q": "~1.4.1"
   }
 }

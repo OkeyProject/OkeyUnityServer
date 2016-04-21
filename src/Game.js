@@ -254,7 +254,7 @@ var Game = function(){
                         //var handUpdateSql = new Mysql();
                 
                         that.NextState(gameId, function(err){
-                            return callback(err);
+                            return callback(err, oldHand[0]);
                         });
                     });
                 } else{
