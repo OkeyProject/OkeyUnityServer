@@ -128,9 +128,20 @@ var Room = function(roomType){
                 }
                 playerSql.Insert("player", data, function(err, results){
                     if(err) throw err;
+                    return callback(err, playerId);
                 });
             }
-            return callback(err, playerId);
+        });
+    }
+
+    that.LeaveRoom = function(playerNum ,gameId , callback){
+        var mysql = new Mysql();
+        var data = {};
+        var colName = "p"+(playerNum+1).toString()+"_id";
+        data[colName] = null;
+        mysql.Update("game", data, "game_id="+gameId, function(err){
+            if(err) throw err;
+            callback(err);
         });
     }
 

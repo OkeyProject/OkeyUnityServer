@@ -7,7 +7,7 @@ var Game = function(){
         return new Game();
     }
     
-    var Deal = function(gameId, playersId){
+    var Deal = function(gameId, playersId, callback){
         var gameCards = new GameCards(gameId);
         var cardToDeal = gameCards.StackDraw(56, function(cardToDeal){
             var playersCard = [[],[],[],[]];
@@ -16,6 +16,7 @@ var Game = function(){
                     playersCard[playerNum].push(cardToDeal.pop());
                 }
             }
+            var allPlayer = [];
             for(var i=0;i<4;i++){
                 var playerHand = [[],[]];
                 for(var j=0;j<12;j++){
@@ -27,24 +28,44 @@ var Game = function(){
                 
                 var data = {hand: JSON.stringify(playerHand)};
                 var cond = "game_id="+gameId+" AND player_id='"+playersId[i]+"'";
-                var mysql = new Mysql();
-                mysql.Update("player", data, cond, function(err){
-                    if(err) throw err;
-                });
+
+                allPlayer[i] = {};
+                allPlayer[i]['data'] = data;
+                allPlayer[i]['cond'] = cond;
+
             }
+
+            var mysql1 = new Mysql();
+            mysql1.Update("player", allPlayer[0]['data'], allPlayer[0]['cond'], function(err){
+                var mysql2 = new Mysql();
+                if(err) throw err;
+                mysql2.Update("player", allPlayer[1]['data'], allPlayer[1]['cond'], function(err){
+                    var mysql3 = new Mysql();
+                    if(err) throw err;
+                    mysql3.Update("player", allPlayer[2]['data'], allPlayer[2]['cond'], function(err){
+                        var mysql4 = new Mysql();
+                        if(err) throw err;
+                        mysql4.Update("player", allPlayer[3]['data'], allPlayer[3]['cond'], function(err){
+                            if(err) throw err;
+                            return callback(err);
+                        });
+                    });
+                });
+            });
 
         });
     }
 
-    var OrderUpdate  = function(gameId){
+    var OrderUpdate  = function(gameId, callback){
         var orderUpdateSql = new Mysql();
         orderUpdateSql.Update("game",{current_order: 1}, "game_id="+gameId, function(err){
             if(err) throw err;
+            return callback(err);
         });
         
     };
 
-    var DiscardInit = function(gameId){
+    var DiscardInit = function(gameId, callback){
         var mysql = new Mysql();
         data = {
             p1: '[]',
@@ -54,6 +75,7 @@ var Game = function(){
         };
         mysql.Update("discard", data, "game_id="+gameId, function(err){
             if(err) throw err;
+            return callback(err);
         });
     };
 
@@ -71,8 +93,9 @@ var Game = function(){
             if(err) {
                 throw err;
             } else {
+                console.log("Current Player: "+playerOrder);
                 var discardSql = new Mysql();
-                var lastPlayerOrder = playerOrder==1 ? 4:playerOrder-1
+                var lastPlayerOrder = playerOrder===1?4:playerOrder-1;
                 var col = "p"+lastPlayerOrder;
                 discardSql.Select("discard", [col], "game_id="+gameId, function(err, discard){
                     if(err){
@@ -127,10 +150,16 @@ var Game = function(){
                 for(var i in results){
                     playersId.push(results[i]['player_id']);
                 }
-                Deal(gameId,playersId);
-                OrderUpdate(gameId);
-                DiscardInit(gameId);
-                callback(err);
+                Deal(gameId,playersId, function(err){
+                    if(err) throw err;
+                    OrderUpdate(gameId, function(err){
+                        if(err) throw err;
+                        DiscardInit(gameId, function(err){
+                            if(err) throw err;
+                            return callback(err);
+                        });
+                    });
+                });
             }
         });
     }
@@ -222,8 +251,10 @@ var Game = function(){
                 if(oldHand.length === 1){
                     var mysql = new Mysql();
                     mysql.Update("player",{hand:JSON.stringify(newHand)},"game_id="+gameId+" AND player_order="+currentPlayer,function(err){
-                        that.NextState(gameId, function(){
-                            return callback(err);
+                        //var handUpdateSql = new Mysql();
+                
+                        that.NextState(gameId, function(err){
+                            return callback(err, oldHand[0]);
                         });
                     });
                 } else{
