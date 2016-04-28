@@ -146,9 +146,10 @@ var Server = function(){
                             if(!("hand" in data)){
                                 return socket.write(ErrMsg("No card to throw"));
                             }
-                            game.GetCurrentState(gameId, function(err, currentPlayer, hand, discard){
-                                game.ThrowCard(data['game_id'], data['hand'], function(err, thrownCard){
+                            game.GetCurrentState(data['game_id'], function(err, currentPlayer, hand, discard){
+                                game.ThrowCard(data['game_id'], JSON.parse(data['hand']), function(err, thrownCard){
                                     if(err){
+                                        console.log(err);
                                         return socket.write(ErrMsg(err));
                                     } else{
                                         var boardcastData = {
@@ -161,7 +162,7 @@ var Server = function(){
                                             var writeData = {
                                                 reply: 1,
                                                 action: "get",
-                                                game_id: gameId,
+                                                game_id: data['game_id'],
                                                 hand: hand,
                                                 discard: discard,
                                                 msg: "Take or draw a new card."

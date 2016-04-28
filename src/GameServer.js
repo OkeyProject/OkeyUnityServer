@@ -60,7 +60,7 @@ var GameServer = function(gameId){
             console.log("Alive: "+liveList.toString());
             if(isAlive){
                 for(var i=0,max=liveList.length; i<max ;i++){ 
-                    players[i].socket.write(JSON.stringify({reply: 0, msg: msg}));
+                    players[liveList[i]].socket.write(JSON.stringify({reply: 0, msg: msg}));
                 }
                 
                 return callback();
@@ -117,7 +117,8 @@ var GameServer = function(gameId){
         });
     }
     
-    that.newRound = function(){
+    that.nextRound = function(){
+        var game = new Game();
         game.GetCurrentState(gameId, function(err,currentPlayer, hand, discard){
             if(err) throw err;
             
