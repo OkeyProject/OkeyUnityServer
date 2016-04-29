@@ -73,7 +73,7 @@ If it is your turn, server would send message as below
     action: "get",
     game_id: < your game id >,
     hand: < current cards in your hand >,
-    discard: < the last player's discard >, // if not exist, the color would be 'empty' and number would be 0
+    discard: < discard from the last player  >, // if not exist, the color would be empty and number would be 0
     msg: "Take or draw a new card."
 }
 ```
