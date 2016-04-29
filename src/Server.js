@@ -158,6 +158,7 @@ var Server = function(){
                                     } else{
                                         var boardcastData = {
                                             player: currentPlayer,
+                                            action: "throw",
                                             thrown: thrownCard
                                         }
                                         gameServers[data['game_id']].Boardcast(boardcastData, function(){});
