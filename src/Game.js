@@ -1,6 +1,7 @@
 var exports = module.exports = {};
 var Mysql = require('./MysqlConnection.js');
 var GameCards = require('./GameCards.js');
+var Async = require('async');
 
 var Game = function(){
     if(!(this instanceof Game)){
@@ -251,16 +252,59 @@ var Game = function(){
                 if(oldHand.length === 1){
                     var mysql = new Mysql();
                     mysql.Update("player",{hand:JSON.stringify(newHand)},"game_id="+gameId+" AND player_order="+currentPlayer,function(err){
-                        //var handUpdateSql = new Mysql();
-                
-                        that.NextState(gameId, function(err){
-                            return callback(err, oldHand[0]);
+                        
+                        Async.waterfall([
+                            function(callback){
+                                var discardSelectSql = new Mysql();
+                                var colStr = "p"+currentPlayer;
+                                discardSelectSql.Select("discard", [colStr], "game_id="+gameId, function(err, results){
+                                    callback(null, JSON.parse(results[0][colStr]));
+                                    console.log(results);
+                                });
+                            }, function(result ,callback){
+                                var discardUpdateSql = new Mysql();
+                                var colStr = "p"+currentPlayer;
+                                var discardItem = oldHand[0];
+                                discardItem['taken'] = false;
+                                result.push(discardItem);
+
+                                var updateData = {};
+                                updateData[colStr] = JSON.stringify(result);
+                                discardUpdateSql.Update("discard", updateData, "game_id="+gameId,  function(err){
+                                    callback(null);
+                                });
+                            }
+                        ],
+                        function(){
+                            that.NextState(gameId, function(err){
+                                return callback(err, oldHand[0]);
+                            });
                         });
+                        
                     });
                 } else{
                     return callback(new Error("Compare card failed"));
                 }
             }
+        });
+    }
+
+    that.TakeDiscard = function(gameId, currentPlayer,callback){
+        var mysql = new Mysql();
+        var colStr = "p"+currentPlayer;
+        mysql.Select("discard", [colStr], "game_id="+gameId, function(err, results){
+            var colStr = "p"+currentPlayer;
+            var updateData = {};
+            var currentData = JSON.parse(results[0][colStr]);
+            
+            currentData[currentData.length-1]['taken'] = true;
+            updateData[colStr] = JSON.stringify(currentData);
+
+            var updateSql = new Mysql();
+            updateSql.Update("discard", updateData, "game_id="+gameId, function(err){
+                callback(err);
+            });
+
         });
     }
 

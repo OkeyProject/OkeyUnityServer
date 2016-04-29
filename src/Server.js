@@ -101,20 +101,24 @@ var Server = function(){
                         if(data['command'] === "take"){
                             game.GetCurrentState(gameId, function(err, currentPlayer, hand, discard){
                                 if(discard['number'] > 0){
-                                    var writeData = {
-                                        reply: 1,
-                                        action: "throw",
-                                        get: discard,
-                                        msg: "You choose to get last player's card, now choose which to throw"
-                                    }
-                                    var boardcastData = {
-                                        player: currentPlayer,
-                                        action: "take",
-                                        taken: discard
-                                    }
-                                    gameServers[gameId].Boardcast(boardcastData);
+                                    
+                                    game.TakeDiscard(gameId, currentPlayer, function(err){
+                                        var writeData = {
+                                            reply: 1,
+                                            action: "throw",
+                                            get: discard,
+                                            msg: "You choose to get last player's card, now choose which to throw"
+                                        }
+                                        var boardcastData = {
+                                            player: currentPlayer,
+                                            action: "take",
+                                            taken: discard
+                                        }
+                                        gameServers[gameId].Boardcast(boardcastData);
 
-                                    return socket.write(JSON.stringify(writeData));
+                                        return socket.write(JSON.stringify(writeData));
+                                    });
+
                                 } else{
                                     return socket.write(ErrMsg("Last player have not discard yet"));
                                 }
@@ -154,6 +158,7 @@ var Server = function(){
                                     } else{
                                         var boardcastData = {
                                             player: currentPlayer,
+                                            action: "throw",
                                             thrown: thrownCard
                                         }
                                         gameServers[data['game_id']].Boardcast(boardcastData, function(){});
