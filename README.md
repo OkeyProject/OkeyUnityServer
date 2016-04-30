@@ -30,6 +30,7 @@
 }
 ```
 ### Join
+There should come delay when join the room, 1 second is recommanded.
 * Send
 ```javascript
 {  
