@@ -10,6 +10,7 @@ var GameServer = function(gameId){
     }
 
     var that = {};
+    var boardcastDelay = 0;
     
     var players = [null,null,null,null];
     that.gameId = gameId;
@@ -62,8 +63,8 @@ var GameServer = function(gameId){
                 for(var i=0,max=liveList.length; i<max ;i++){ 
                     players[liveList[i]].socket.write(JSON.stringify({reply: 0, msg: msg}));
                 }
-                
                 return callback();
+                
             }
             return callback();
         });

@@ -94,7 +94,7 @@ var Game = function(){
             if(err) {
                 throw err;
             } else {
-                console.log("Current Player: "+playerOrder);
+                //console.log("Current Player: "+playerOrder);
                 var discardSql = new Mysql();
                 var lastPlayerOrder = playerOrder===1?4:playerOrder-1;
                 var col = "p"+lastPlayerOrder;
@@ -198,7 +198,9 @@ var Game = function(){
                 throw err;
             } else {
                 var mysql = new Mysql();
+                console.log("Player "+currentPlayer+"is over");
                 var nextPlayerOrder = currentPlayer==4? 1:currentPlayer+1;
+                console.log("Next player: "+currentPlayer);
                 mysql.Update("game", {current_order: nextPlayerOrder}, "game_id="+gameId, function(err){
                     if(err) throw err;
                     else return callback(err);
