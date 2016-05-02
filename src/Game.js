@@ -39,15 +39,14 @@ var Game = function(){
             var mysql1 = new Mysql();
             mysql1.Update("player", allPlayer[0]['data'], allPlayer[0]['cond'], function(err){
                 var mysql2 = new Mysql();
-                if(err) throw err;
+                if(err) return callback(err);
                 mysql2.Update("player", allPlayer[1]['data'], allPlayer[1]['cond'], function(err){
                     var mysql3 = new Mysql();
-                    if(err) throw err;
+                    if(err) return callback(err);
                     mysql3.Update("player", allPlayer[2]['data'], allPlayer[2]['cond'], function(err){
                         var mysql4 = new Mysql();
-                        if(err) throw err;
+                        if(err) return callback(err.toString());
                         mysql4.Update("player", allPlayer[3]['data'], allPlayer[3]['cond'], function(err){
-                            if(err) throw err;
                             return callback(err);
                         });
                     });
@@ -60,7 +59,6 @@ var Game = function(){
     var OrderUpdate  = function(gameId, callback){
         var orderUpdateSql = new Mysql();
         orderUpdateSql.Update("game",{current_order: 1}, "game_id="+gameId, function(err){
-            if(err) throw err;
             return callback(err);
         });
         
@@ -75,7 +73,6 @@ var Game = function(){
             p4: '[]'
         };
         mysql.Update("discard", data, "game_id="+gameId, function(err){
-            if(err) throw err;
             return callback(err);
         });
     };
@@ -92,7 +89,7 @@ var Game = function(){
         var mysql = new Mysql();
         mysql.Select("player", ['hand'], "game_id="+gameId+" AND player_order="+playerOrder, function(err, hand){
             if(err) {
-                throw err;
+                return callback(err, null, null)
             } else {
                 //console.log("Current Player: "+playerOrder);
                 var discardSql = new Mysql();
@@ -100,7 +97,8 @@ var Game = function(){
                 var col = "p"+lastPlayerOrder;
                 discardSql.Select("discard", [col], "game_id="+gameId, function(err, discard){
                     if(err){
-                        throw err;
+                        callback(err, null, null);
+                        //throw err;
                     } else {
                         var cards = JSON.parse(discard[0]['p'+lastPlayerOrder]);
                         if(discard.length == 0){
@@ -143,7 +141,8 @@ var Game = function(){
         var mysql = new Mysql();
         mysql.Select("player", ["player_id"], "game_id="+gameId,function(err, results){
             if(err){ 
-                throw err;
+                //throw err;
+                return callback(err);
             }else{
                 if(results.length != 4) callback(new Error("No enough player"));
                 var playersId = [];
@@ -152,9 +151,12 @@ var Game = function(){
                     playersId.push(results[i]['player_id']);
                 }
                 Deal(gameId,playersId, function(err){
-                    if(err) throw err;
+                    if(err) return callback(err);
                     OrderUpdate(gameId, function(err){
-                        if(err) throw err;
+                        if(err) {
+                            //throw err;
+                            return callback(err);
+                        }
                         DiscardInit(gameId, function(err){
                             if(err) throw err;
                             return callback(err);
@@ -168,7 +170,7 @@ var Game = function(){
     that.CurrentPlayer = function(gameId, callback){
         GetCurrentOrder(gameId, function(err, results){
             if(err){
-                throw err;
+                return callback(err, null);
             } else {
                 if(results.length == 0){
                     return callback(new Error("Can't get order",""));
@@ -184,7 +186,7 @@ var Game = function(){
             if(err) throw err;
             GetPlayerCard(gameId, currentPlayer, function(err, hand, discard){
                 if(err){
-                    throw err;
+                    return callback(err, null, null);
                 } else{
                     callback(err, currentPlayer, hand, discard);
                 }
@@ -195,15 +197,14 @@ var Game = function(){
     that.NextState = function(gameId, callback){
         that.CurrentPlayer(gameId, function(err, currentPlayer){
             if(err){
-                throw err;
+                return callback(err, null);
             } else {
                 var mysql = new Mysql();
                 console.log("Player "+currentPlayer+"is over");
                 var nextPlayerOrder = currentPlayer==4? 1:currentPlayer+1;
                 console.log("Next player: "+currentPlayer);
                 mysql.Update("game", {current_order: nextPlayerOrder}, "game_id="+gameId, function(err){
-                    if(err) throw err;
-                    else return callback(err);
+                    return callback(err);
                 });
             }
         });
@@ -217,7 +218,7 @@ var Game = function(){
                     hand[1].push(drawedCard[0]);
                     var mysql = new Mysql();
                     mysql.Update("player", {hand:JSON.stringify(hand)}, "game_id="+gameId+" AND player_order="+currentPlayer, function(err){
-                        if(err) throw err;
+                        if(err) return callback(err, null);
                         callback(err, drawedCard[0]);
                     });
                 });
@@ -230,7 +231,7 @@ var Game = function(){
     that.ThrowCard = function(gameId, newHand, callback){
         that.GetCurrentState(gameId, function(err, currentPlayer, hand, discard){
             if( err ){
-                throw err;
+                return callback(err);
             } else { 
                 if(hand[1].length == 12){
                     if(discard['number'] > 0){
