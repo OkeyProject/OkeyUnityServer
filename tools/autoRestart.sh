@@ -6,4 +6,5 @@ do
     if [ -z $id ]; then 
         node /home/Justin/OkeyUnityServer/src/Server.js &
     fi
+
 done
