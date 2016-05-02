@@ -5,6 +5,8 @@
 >> Host: 140.113.123.225
 >>> Port: 7975
 
+## Client should always be listen and send, don't send message without recommanded.
+
 ## Room Usage
 ```javascript
 {
