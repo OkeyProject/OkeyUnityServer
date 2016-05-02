@@ -17,7 +17,7 @@ var Server = function(){
     var gameServers = {};
 
     var ErrMsg = function(msg){
-        return JSON.stringify({reply: 1, error: msg});
+        return JSON.stringify({reply: 1, error: msg.toString()});
     }
 
     var server = Net.createServer();
@@ -29,7 +29,7 @@ var Server = function(){
                 try{
                     data = JSON.parse(data);
                 } catch(err){
-                    socket.write(err);
+                    socket.write(ErrMsg(err));
                     return
                 }
                 console.log(data);

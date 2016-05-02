@@ -41,7 +41,7 @@ var GameServer = function(gameId){
                 deadList.push(i);
                 var room = new Room();
                 room.LeaveRoom(i, gameId, function(err){
-                    if(err) throw err;
+                    if(err) return callback(err, null, null);
                 });
             } else {
                 liveList.push(i);
@@ -97,7 +97,7 @@ var GameServer = function(gameId){
             Async.waterfall([
                 function(callback){
                     game.GetCurrentState(gameId, function(err,currentPlayer, hand, discard){
-                        if(err) throw err;
+                        if(err) return callback(err, null, null, null);
                         else callback(null,currentPlayer, hand, discard);                   
                     });
                 },
@@ -121,7 +121,13 @@ var GameServer = function(gameId){
     that.nextRound = function(){
         var game = new Game();
         game.GetCurrentState(gameId, function(err,currentPlayer, hand, discard){
-            if(err) throw err;
+            if(err){
+                try{
+                    players[currentPlayer-1].socket.write(JSON.stringify(err.toString()));
+                } catch(err){
+                    console.log(err.toString());
+                }
+            }
             
             var writeData = {
                 reply: 1,
