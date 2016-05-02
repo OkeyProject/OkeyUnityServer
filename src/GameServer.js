@@ -61,7 +61,11 @@ var GameServer = function(gameId){
             console.log("Alive: "+liveList.toString());
             if(isAlive){
                 for(var i=0,max=liveList.length; i<max ;i++){ 
-                    players[liveList[i]].socket.write(JSON.stringify({reply: 0, msg: msg}));
+                    try{
+                        players[liveList[i]].socket.write(JSON.stringify({reply: 0, msg: msg}));
+                    } catch(err){
+                        console.log(err.toString());
+                    }
                 }
                 return callback();
                 
@@ -110,7 +114,12 @@ var GameServer = function(gameId){
                         discard: discard,
                         msg: "Take or draw a new card."
                     }
-                    players[currentPlayer-1].socket.write(JSON.stringify(writeData));
+
+                    try{
+                        players[currentPlayer-1].socket.write(JSON.stringify(writeData));
+                    } catch(err){
+                        console.log(err.toString());
+                    }
                 }
             ],         
             function(err){
@@ -137,7 +146,11 @@ var GameServer = function(gameId){
                 discard: discard,
                 msg: "Take or draw a new card."
             }
-            players[currentPlayer-1].socket.write(JSON.stringify(writeData));
+            try{
+                players[currentPlayer-1].socket.write(JSON.stringify(writeData));
+            } catch(err){
+                console.log(err.toString());
+            }
         });
     }
 
