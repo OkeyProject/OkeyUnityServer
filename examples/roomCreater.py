@@ -19,13 +19,14 @@ print(sock.recv(2048))
 sock.send(json.dumps(a))
 while True:
     data = sock.recv(2048)
-    print(data)
+    #print(data)
     data = json.loads(data)
     if data['reply'] == 0:
         continue
     else:
         if data['action'] == "get":
             c = {'action': 'game', 'command': 'draw', 'game_id':data['game_id']}
+            print data['game_id']
             gameId = data['game_id']
             hand = data['hand']
             sock.send(json.dumps(c))
