@@ -35,7 +35,7 @@ var Server = function(){
                 console.log(data);
                 if("action" in data && "command" in data){
                     if(data['action'] != "room" && data['action'] != "game"){
-                        retun socket.write(ErrMsg("Unknown action"));
+                        return socket.write(ErrMsg("Unknown action"));
                     } else if(data['action'] == "room"){
                         if(data['command']!="create" && data['command']!="join" && data['command']!="random"){
                             return socket.write(ErrMsg("Unknown command "+data['command']));
