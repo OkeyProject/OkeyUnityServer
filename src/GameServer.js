@@ -56,6 +56,15 @@ var GameServer = function(gameId){
         
     }
 
+    that.CheckRoomAlive = function(callback){
+        for(var i=0; i<4; i++){
+            if(players[i] != null){
+                return callback(true);
+            }
+        }
+        return callback(false);
+    }
+
     that.Boardcast = function(msg, callback){
         that.CheckAlive(function(isAlive, liveList,deadList){
             console.log("Alive: "+liveList.toString());
