@@ -147,6 +147,14 @@ var Room = function(roomType){
         });
     }
 
+    that.DeleteRoom = function(gameId, callback){
+        var mysql = new Mysql();
+        mysql.Delete("game", "game_id="+gameId, function(err){
+            if(err) throw err;
+            callback(err);
+        });
+    }
+
     return that;
 };
 

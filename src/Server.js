@@ -200,6 +200,17 @@ var Server = function(){
                         }
                         gameServers[i].Boardcast("Player "+deadList.toString()+" disconnected.", function(){});
                     }
+
+                    gameServers[i].CheckRoomAlive(function(alive){
+                        if(!alive){
+                            var room = new Room();
+                            //console.log("Hello");
+                            room.DeleteRoom(i, function(err){
+                                if(err) throw err;
+                                delete gameServers[i];
+                            });
+                        }
+                    });
                 });
             }
         });
