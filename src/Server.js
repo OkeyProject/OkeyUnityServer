@@ -24,7 +24,7 @@ var Server = function(){
 
     server.on('connection', function(socket){
         console.log("Connected from "+socket.remoteAddress+":"+socket.remotePort);
-        socket.write(JSON.stringify({reply: 1, msg: "Welcome, please use commands create, join(with game id), or random."}), function(){
+        socket.write(JSON.stringify({reply: 1, msg: "Welcome, please use commands create, join(with game id), or random.", warning: "Don't close your fucking socket."}), function(){
             socket.on('data', function(data){
                 try{
                     data = JSON.parse(data);

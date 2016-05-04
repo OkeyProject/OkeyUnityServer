@@ -58,8 +58,8 @@ var Room = function(roomType){
         mysql.Select("game", cols, "game_id="+gameId, function(err, results){
             if(err) throw err;
             if(results.length == 0){
-                throw new Error("Wrong game id");
-                //return callback("Wrong game id","");
+                //throw new Error("Wrong game id");
+                return callback("Wrong game id", null, null);
             }
             
             var emptyPlayer = false;
@@ -81,8 +81,8 @@ var Room = function(roomType){
                 order++;
             }
             if(!emptyPlayer){
-                throw new Error("No space for another player");
-                //return callback("No space for another player","");
+                //throw new Error("No space for another player");
+                return callback("No space for another player",null , null);
             }
         });       
         
@@ -95,7 +95,8 @@ var Room = function(roomType){
     that.CreateRoom = function(callback){
         InsertGameInfo(gameId, function(err, gameId, playerId){
             if(err) {
-                throw err;
+                return callback(err, null, null);
+                //throw err;
             } else {
                 var playerSql = new Mysql();
                 var discardSql = new Mysql();
@@ -118,7 +119,8 @@ var Room = function(roomType){
     that.JoinRoom = function(gameId, callback){
         InsertPlayerInfo(gameId, function(err, playerId, order){
             if(err) {
-                throw err;
+                //throw err;
+                return callback(err, null);
             }else{
                 var playerSql = new Mysql();
                 var data = {
