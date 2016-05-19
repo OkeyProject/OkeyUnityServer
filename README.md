@@ -136,7 +136,7 @@ If it is your turn, server would send message as below
 ```javascript
 {
     action: "game",
-    command: "draw",
+    command: "throw",
     game_id: < your game id >
     hand: [ < the new status in your hand, system would > ]
 }
