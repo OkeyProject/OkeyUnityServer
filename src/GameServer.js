@@ -67,13 +67,13 @@ var GameServer = function(gameId){
 
     that.Boardcast = function(msg, callback){
         that.CheckAlive(function(isAlive, liveList,deadList){
-            console.log("Alive: "+liveList.toString());
+            //console.log("Alive: "+liveList.toString());
             if(isAlive){
                 for(var i=0,max=liveList.length; i<max ;i++){ 
                     try{
                         players[liveList[i]].socket.write(JSON.stringify({reply: 0, msg: msg}));
                     } catch(err){
-                        console.log(err.toString());
+                        //console.log(err.toString());
                     }
                 }
                 return callback();
@@ -127,7 +127,7 @@ var GameServer = function(gameId){
                     try{
                         players[currentPlayer-1].socket.write(JSON.stringify(writeData));
                     } catch(err){
-                        console.log(err.toString());
+                        //console.log(err.toString());
                     }
                 }
             ],         
@@ -143,7 +143,7 @@ var GameServer = function(gameId){
                 try{
                     players[currentPlayer-1].socket.write(JSON.stringify(err.toString()));
                 } catch(err){
-                    console.log(err.toString());
+                    //console.log(err.toString());
                 }
             }
             
@@ -158,7 +158,7 @@ var GameServer = function(gameId){
             try{
                 players[currentPlayer-1].socket.write(JSON.stringify(writeData));
             } catch(err){
-                console.log(err.toString());
+                //console.log(err.toString());
             }
         });
     }

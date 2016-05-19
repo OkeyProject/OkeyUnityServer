@@ -27,12 +27,15 @@ var Server = function(){
         socket.write(JSON.stringify({reply: 1, msg: "Welcome, please use commands create, join(with game id), or random.", warning: "Don't close your fucking socket."}), function(){
             socket.on('data', function(data){
                 try{
+                    //console.log("\n---\n\n");
+                    //console.log(data.toString());
                     data = JSON.parse(data);
+                    //console.log(data);
+                    //console.log("\n---\n\n");
                 } catch(err){
                     socket.write(ErrMsg(err));
                     return
                 }
-                console.log(data);
                 if("action" in data && "command" in data){
                     if(data['action'] != "room" && data['action'] != "game"){
                         return socket.write(ErrMsg("Unknown action"));
@@ -50,7 +53,7 @@ var Server = function(){
                                     var newServer = new GameServer(gameId);
                                     newServer.AddPlayer(socket, playerId);
                                     gameServers[gameId] = newServer;
-                                    console.log("create room: "+gameId);
+                                    //console.log("create room: "+gameId);
                                     return socket.write(JSON.stringify({reply: 0, game_id: gameId, player_id: playerId}));
                                 }
                             });
@@ -151,9 +154,10 @@ var Server = function(){
                                 return socket.write(ErrMsg("No card to throw"));
                             }
                             game.GetCurrentState(data['game_id'], function(err, currentPlayer, hand, discard){
+
                                 game.ThrowCard(data['game_id'], JSON.parse(data['hand']), function(err, thrownCard){
                                     if(err){
-                                        console.log(err);
+                                        //console.log(err);
                                         return socket.write(ErrMsg(err));
                                     } else{
                                         var boardcastData = {
@@ -187,11 +191,11 @@ var Server = function(){
         });
 
         socket.on('error', function(){
-            console.log("Error Occur");
+            //console.log("Error Occur");
         });
 
         socket.on('close', function(){
-            console.log("Socket is closed");
+            //console.log("Socket is closed");
             for(var i in gameServers){
                 gameServers[i].CheckAlive(function(isAlive, liveList, deadList){
                     if(deadList.length > 0){

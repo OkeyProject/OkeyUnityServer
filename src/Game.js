@@ -146,7 +146,7 @@ var Game = function(){
             }else{
                 if(results.length != 4) callback(new Error("No enough player"));
                 var playersId = [];
-                console.log(results);
+                //console.log(results);
                 for(var i in results){
                     playersId.push(results[i]['player_id']);
                 }
@@ -200,9 +200,9 @@ var Game = function(){
                 return callback(err, null);
             } else {
                 var mysql = new Mysql();
-                console.log("Player "+currentPlayer+"is over");
+                //console.log("Player "+currentPlayer+"is over");
                 var nextPlayerOrder = currentPlayer==4? 1:currentPlayer+1;
-                console.log("Next player: "+currentPlayer);
+                //console.log("Next player: "+currentPlayer);
                 mysql.Update("game", {current_order: nextPlayerOrder}, "game_id="+gameId, function(err){
                     return callback(err);
                 });
@@ -243,8 +243,12 @@ var Game = function(){
                 
                 var oldHand = ShrinkArray(hand);
                 var cmpHand = ShrinkArray(newHand);
+                console.log(oldHand);
+                console.log(cmpHand);
                 for(var i=0, max=cmpHand.length; i< max; i++){
                     var elementId = SearchElement(oldHand, cmpHand[i]);
+                    console.log(cmpHand[i]);
+                    console.log(elementId);
                     if(elementId >= 0){
                         oldHand.splice(elementId, elementId+1);
                     } else{
@@ -262,7 +266,7 @@ var Game = function(){
                                 var colStr = "p"+currentPlayer;
                                 discardSelectSql.Select("discard", [colStr], "game_id="+gameId, function(err, results){
                                     callback(null, JSON.parse(results[0][colStr]));
-                                    console.log(results);
+                                    //console.log(results);
                                 });
                             }, function(result ,callback){
                                 var discardUpdateSql = new Mysql();
